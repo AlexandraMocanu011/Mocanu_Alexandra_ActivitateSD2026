@@ -3,155 +3,126 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct StructuraCarte {
+
+
+struct StructuraCalculator {
 	int id;
-	int nrPagini;
+	int memorieRAM;
+
 	float pret;
-	char* titlu;
-	char* autor;
-};
-typedef struct StructuraCarte Carte;
-typedef struct Nod Nod;
-typedef struct ListaDubla ListaDubla;
 
-struct Nod {
-	Carte info;
-	Nod* next;
-	Nod* prev;
-};
+	char* model;
+	char* producator;
 
-struct ListaDubla {
-	Nod* prim;
-	Nod* ultim;
-};
 
-Carte citireCarteDinFisier(FILE* file) {
+	unsigned char generatie;
+
+};
+typedef struct StructuraCalculator Calculator;
+
+void afisareCalculator(Calculator calculator) {
+	printf("Id: %d\n", calculator.id);
+	printf("Memorie RAM: %d\n", calculator.memorieRAM);
+	printf("Pret: %.2f\n", calculator.pret);
+	printf("Model: %s\n", calculator.model);
+	printf("Producator: %s\n", calculator.producator);
+	printf("Generatie: %c\n\n", calculator.generatie);
+}
+
+
+
+void afisareVectorCalculatoare(Calculator* calculatoare, int nrCalculatoare) {
+	for (int i = 0; i < nrCalculatoare; i++) {
+		afisareCalculator(calculatoare[i]);
+	}
+}
+
+void adaugaCalculatorInVector(Calculator** calculatoare, int* nrCalculatoare, Calculator calculatorNou) {
+	Calculator* aux = (Calculator*)malloc(sizeof(Calculator) * ((*nrCalculatoare) + 1));
+
+	for (int i = 0; i < *nrCalculatoare; i++) {
+		aux[i] = (*calculatoare)[i];
+	}
+
+
+	aux[*nrCalculatoare] = calculatorNou;
+
+	free(*calculatoare);
+	*calculatoare = aux;
+	(*nrCalculatoare)++;
+}
+
+
+
+Calculator citireCalculatorFisier(FILE* file) {
 	char buffer[100];
 	char sep[3] = ",\n";
 	fgets(buffer, 100, file);
 	char* aux;
-	Carte c1;
+	Calculator c1;
 
 	aux = strtok(buffer, sep);
 	c1.id = atoi(aux);
-	c1.nrPagini = atoi(strtok(NULL, sep));
-	c1.pret = atof(strtok(NULL, sep));
+	c1.memorieRAM = atoi(strtok(NULL, sep));
+
+	c1.pret = (float)atof(strtok(NULL, sep));
+
 
 	aux = strtok(NULL, sep);
-	c1.titlu = malloc(strlen(aux) + 1);
-	strcpy_s(c1.titlu, strlen(aux) + 1, aux);
+	c1.model = (char*)malloc(strlen(aux) + 1);
+	strcpy(c1.model, aux);
 
 	aux = strtok(NULL, sep);
-	c1.autor = malloc(strlen(aux) + 1);
-	strcpy_s(c1.autor, strlen(aux) + 1, aux);
+	c1.producator = (char*)malloc(strlen(aux) + 1);
+	strcpy(c1.producator, aux);
+
+	c1.generatie = *strtok(NULL, sep);
 
 	return c1;
+
 }
 
-void afisareCarte(Carte carte) {
-	printf("Id: %d\n", carte.id);
-	printf("Nr. pagini: %d\n", carte.nrPagini);
-	printf("Pret: %.2f\n", carte.pret);
-	printf("Titlu: %s\n", carte.titlu);
-	printf("Autor: %s\n\n", carte.autor);
-}
-
-void afisareListaCarti(ListaDubla lista) {
-	Nod* p = lista.prim;
-	while (p) {
-		afisareCarte(p->info);
-		p = p->next;
-	}
-}
-
-void afisareInversaListaCarti(ListaDubla lista) {
-	Nod* p = lista.ultim;
-	while (p) {
-		afisareCarte(p->info);
-		p = p->prev;
-	}
-}
-
-void adaugaCarteInLista(ListaDubla* lista, Carte carteNoua) {
-	Nod* nou = malloc(sizeof(Nod));
-	nou->info = carteNoua;
-	nou->next = nou->prev = NULL;
-	if (lista->ultim) {
-		nou->prev = lista->ultim;
-		lista->ultim->next = nou;
-		lista->ultim = nou;
-	}
-	else {
-		lista->ultim = lista->prim = nou;
-	}
-}
-
-ListaDubla* citireLDCartiDinFisier(const char* numeFisier) {
+Calculator* citireVectorCalculatoareFisier(const char* numeFisier, int* nrCalculatoareCitite) {
 	FILE* file = fopen(numeFisier, "r");
+	Calculator* calculatoare = NULL;
+
+	*nrCalculatoareCitite = 0;
+
 	if (file) {
-		ListaDubla* lista = malloc(sizeof(ListaDubla));
-		lista->prim = NULL;
-		lista->ultim = NULL;
 		while (!feof(file)) {
-			adaugaCarteInLista(lista, citireCarteDinFisier(file));
+
+			adaugaCalculatorInVector(&calculatoare, nrCalculatoareCitite, citireCalculatorFisier(file));
+
 		}
 		fclose(file);
-		return lista;
 	}
-	else {
-		ListaDubla* lista = malloc(sizeof(ListaDubla));
-		lista->prim = NULL;
-		lista->ultim = NULL;
-		return lista;
-	}
+
+	return calculatoare;
 }
 
-
-void dezalocareLDCarti(ListaDubla** lista) {
-	Nod* p = (*lista)->prim;
-	while (p) {
-		free(p->info.titlu);
-		free(p->info.autor);
-		Nod* aux = p;
-		p = p->next;
-		free(aux);
+void dezalocareVectorCalculatoare(Calculator** vector, int* nrCalculatoare) {
+	for (int i = 0; i < *nrCalculatoare; i++) {
+		free((*vector)[i].model);
+		free((*vector)[i].producator);
 	}
-	free(*lista);
-	*lista = NULL;
+
+	free(*vector);
+	*vector = NULL;
+	*nrCalculatoare = 0;
+
 }
-
-
-float calculeazaPretMediu(ListaDubla lista) {
-	float suma = 0;
-	int count = 0;
-	Nod* p = lista.prim;
-	while (p) {
-		suma += p->info.pret;
-		count++;
-		p = p->next;
-	}
-	if (count > 0) {
-		return suma / count;
-	}
-	else {
-		return 0;
-	}
-}
-
-
-
-
-
 
 int main() {
 
-	ListaDubla* lista = citireLDCartiDinFisier("carti.txt");
+	int nrCalculatoare = 0;
 
-	afisareListaCarti(*lista);
+	Calculator* calculatoare = citireVectorCalculatoareFisier("calculatoare.txt", &nrCalculatoare);
 
-	printf("Pret mediu: %.2f\n", calculeazaPretMediu(*lista));
+	printf("Vectorul de calculatoare citit din fisier:\n\n");
+	afisareVectorCalculatoare(calculatoare, nrCalculatoare);
 
-	dezalocareLDCarti(&lista);
+
+	dezalocareVectorCalculatoare(&calculatoare, &nrCalculatoare);
 
 	return 0;
 }
