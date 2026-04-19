@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include<stdio.h>
 #include<malloc.h>
 #include<string.h>
@@ -72,6 +73,15 @@ void put(Nod** coada, Factura f) {
 	}
 }
 
+float calculeazaSumaTotala(Nod* coada) {
+	float sumaTotala = 0;
+	while (coada != NULL) {
+		sumaTotala += coada->info.suma;
+		coada = coada->next;
+	}
+	return sumaTotala;
+}
+
 int main() {
 	Nod* stiva = NULL;
 	push(&stiva, initFactura("Popescu Ana", 1, 120.5));
@@ -90,6 +100,8 @@ int main() {
 	put(&coada, initFactura("Popescu Ana", 1, 120.5));
 	put(&coada, initFactura("Ionescu Mihai", 2, 89.99));
 	put(&coada, initFactura("Georgescu Vlad", 3, 250.75));
+
+	printf("\nSuma totala a facturilor este %.2f", calculeazaSumaTotala(coada));
 
 	printf("\nTraversare coada:");
 	while (coada != NULL) {
