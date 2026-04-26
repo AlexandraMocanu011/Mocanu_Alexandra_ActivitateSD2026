@@ -82,6 +82,15 @@ float calculeazaSumaTotala(Nod* coada) {
 	return sumaTotala;
 }
 
+void afisareFacturiPesteSuma(Nod* coada, float prag) {
+	while (coada != NULL) {
+		if (coada->info.suma > prag) {
+			afisareFactura(coada->info);
+		}
+		coada = coada->next;
+	}
+}
+
 int main() {
 	Nod* stiva = NULL;
 	push(&stiva, initFactura("Popescu Ana", 1, 120.5));
@@ -102,6 +111,9 @@ int main() {
 	put(&coada, initFactura("Georgescu Vlad", 3, 250.75));
 
 	printf("\nSuma totala a facturilor este %.2f", calculeazaSumaTotala(coada));
+
+	printf("\nFacturi cu suma mai mare de 100:");
+	afisareFacturiPesteSuma(coada, 100);
 
 	printf("\nTraversare coada:");
 	while (coada != NULL) {
