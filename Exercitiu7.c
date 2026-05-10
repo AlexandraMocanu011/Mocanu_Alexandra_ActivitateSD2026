@@ -142,6 +142,16 @@ void salvareInFisier(Nod* coada, const char* numeFisier) {
 	fclose(f);
 }
 
+void actualizeazaSumaDupaId(Nod* coada, int id, float procent) {
+	while (coada != NULL) {
+		if (coada->info.id == id) {
+			coada->info.suma = coada->info.suma * (1 + procent / 100);
+			return;
+		}
+		coada = coada->next;
+	}
+}
+
 int main() {
 	Nod* coada = NULL;
 
@@ -154,22 +164,27 @@ int main() {
 	printf("\nFacturi peste 100:");
 	afisareFacturiPesteSuma(coada, 100);
 
-	// CAUTARE
+	// cautare
 	Factura gasita = cautaFacturaDupaId(coada, 2);
 	printf("\nCautare ID 2:");
 	if (gasita.id != 0) afisareFactura(gasita);
 
-	// STERGERE
+	// stergere
 	stergeFacturaDupaId(&coada, 2);
 	printf("\nDupa stergere ID 2:");
 	afisareFacturiPesteSuma(coada, 0);
 
-	// SORTARE
+	// sortare
 	sortareDupaSuma(coada);
 	printf("\nDupa sortare:");
 	afisareFacturiPesteSuma(coada, 0);
 
-	// SALVARE
+	// actualizare suma
+	actualizeazaSumaDupaId(coada, 1, 10);
+	printf("\nDupa majorare cu 10%% pentru ID 1:");
+	afisareFacturiPesteSuma(coada, 0);
+
+	// salvare
 	salvareInFisier(coada, "facturi.txt");
 
 	printf("\nTraversare finala:");
